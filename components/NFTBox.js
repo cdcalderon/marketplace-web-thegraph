@@ -12,6 +12,9 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
     const [tokenName, setTokenName] = useState("")
     const [tokenDescription, setTokenDescription] = useState("")
 
+    const isOwnedByUser = seller === account || seller === undefined
+    const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15)
+
     // BasicNFt ->  function tokenURI(uint256 tokenId) public view override returns (string memory) { }
     const { runContractFunction: getTokenURI } = useWeb3Contract({
         abi: nftAbi,
