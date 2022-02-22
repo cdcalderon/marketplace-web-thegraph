@@ -13,7 +13,12 @@ const truncateStr = (fullStr, strLen) => {
     const seperatorLength = separator.length
     const charsToShow = strLen - seperatorLength
     const frontChars = Math.ceil(charsToShow / 2)
-    return fullStr.substring(0, frontChars) + separator
+    const backChars = Math.floor(charsToShow / 2)
+    return (
+        fullStr.substring(0, frontChars) +
+        separator +
+        fullStr.substring(fullStr.length - backChars)
+    )
 }
 
 export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress, seller }) {
