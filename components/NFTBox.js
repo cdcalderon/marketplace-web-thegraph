@@ -6,6 +6,16 @@ import { ethers } from "ethers"
 import { Card, useNotification } from "web3uikit"
 import Image from "next/image"
 
+const truncateStr = (fullStr, strLen) => {
+    if (fullStr.length <= strLen) return fullStr
+
+    const separator = "..."
+    const seperatorLength = separator.length
+    const charsToShow = strLen - seperatorLength
+    const frontChars = Math.ceil(charsToShow / 2)
+    return fullStr.substring(0, frontChars) + separator
+}
+
 export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress, seller }) {
     const { isWeb3Enabled, account } = useMoralis()
     const [imageURI, setImageURI] = useState("")
