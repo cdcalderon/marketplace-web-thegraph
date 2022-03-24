@@ -30,6 +30,12 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
     const isOwnedByUser = seller === account || seller === undefined
     const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15)
 
+    useEffect(() => {
+        if (isWeb3Enabled) {
+            updateUI()
+        }
+    }, [isWeb3Enabled])
+
     // BasicNFt ->  function tokenURI(uint256 tokenId) public view override returns (string memory) { }
     const { runContractFunction: getTokenURI } = useWeb3Contract({
         abi: nftAbi,
@@ -40,11 +46,16 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
         },
     })
 
-    useEffect(() => {
-        if (isWeb3Enabled) {
-            updateUI()
-        }
-    }, [isWeb3Enabled])
+    const { runContractFunction: buyItem } = useWeb3Contract({
+        abi: nftMarketplaceAbi,
+        contractAddress: marketplaceAddress,
+        functionName: "buyItem",
+        msgValue: price,
+        params: {
+            nftAddress: nftAddress,
+            tokenId: tokenId,
+        },
+    })
 
     async function updateUI() {
         const tokenURI = await getTokenURI()
