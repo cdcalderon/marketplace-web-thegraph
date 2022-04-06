@@ -1,9 +1,9 @@
-import { MoralisProvider } from "react-moralis"
-import { NotificationProvider } from "web3uikit"
-import Header from "../components/Header"
-import Head from "next/head"
 import "../styles/globals.css"
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client"
+import { MoralisProvider } from "react-moralis"
+import { NotificationProvider } from "web3uikit"
+import Head from "next/head"
+import Header from "../components/Header"
 
 const client = new ApolloClient({
     cache: new InMemoryCache(),
