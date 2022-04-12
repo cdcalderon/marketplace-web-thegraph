@@ -1,9 +1,9 @@
 import { useMoralisQuery, useMoralis } from "react-moralis"
 import { useQuery } from "@apollo/client"
+import GET_ACTIVE_ITEMS from "../constants/subgraphQueries"
 import networkMapping from "../constants/networkMapping.json"
 import NFTBox from "../components/NFTBox"
 import styles from "../styles/Home.module.css"
-import GET_ACTIVE_ITEMS from "../constants/subgraphQueries"
 
 export default function Home() {
     const { isWeb3Enabled, chainId } = useMoralis()
@@ -20,12 +20,17 @@ export default function Home() {
                         <div>Loading...</div>
                     ) : (
                         listedNfts.activeItems.map((nft) => {
-                            console.log("carlos", nft)
+                            console.log(nft)
                             const { price, nftAddress, tokenId, seller } = nft
                             return (
-                                <>
-                                    Carlos Test : {price} | {nftAddress} | {tokenId} | {seller}
-                                </>
+                                <NFTBox
+                                    price={price}
+                                    nftAddress={nftAddress}
+                                    tokenId={tokenId}
+                                    marketplaceAddress={marketplaceAddress}
+                                    seller={seller}
+                                    key={`${nftAddress}${tokenId}`}
+                                />
                             )
                         })
                     )

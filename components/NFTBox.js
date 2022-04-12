@@ -1,19 +1,20 @@
+import { Card, useNotification } from "web3uikit"
+import { ethers } from "ethers"
 import { useState, useEffect } from "react"
 import { useWeb3Contract, useMoralis } from "react-moralis"
-import nftMarketplaceAbi from "../constants/NftMarketplace.json"
-import nftAbi from "../constants/BasicNft.json"
-import { ethers } from "ethers"
-import { Card, useNotification } from "web3uikit"
 import Image from "next/image"
+import nftAbi from "../constants/BasicNft.json"
+import nftMarketplaceAbi from "../constants/NftMarketplace.json"
+import UpdateListingModal from "./UpdateListingModal"
 
 const truncateStr = (fullStr, strLen) => {
     if (fullStr.length <= strLen) return fullStr
 
-    const separator = "..."
-    const seperatorLength = separator.length
+    const backChars = Math.floor(charsToShow / 2)
     const charsToShow = strLen - seperatorLength
     const frontChars = Math.ceil(charsToShow / 2)
-    const backChars = Math.floor(charsToShow / 2)
+    const separator = "..."
+    const seperatorLength = separator.length
     return (
         fullStr.substring(0, frontChars) +
         separator +
@@ -22,13 +23,13 @@ const truncateStr = (fullStr, strLen) => {
 }
 
 export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress, seller }) {
-    const { isWeb3Enabled, account } = useMoralis()
     const [imageURI, setImageURI] = useState("")
-    const [tokenName, setTokenName] = useState("")
-    const [tokenDescription, setTokenDescription] = useState("")
     const [showModal, setShowModal] = useState(false)
-    const hideModal = () => setShowModal(false)
+    const [tokenDescription, setTokenDescription] = useState("")
+    const [tokenName, setTokenName] = useState("")
+    const { isWeb3Enabled, account } = useMoralis()
     const dispatch = useNotification()
+    const hideModal = () => setShowModal(false)
 
     const isOwnedByUser = seller === account || seller === undefined
     const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15)
@@ -38,16 +39,6 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
             updateUI()
         }
     }, [isWeb3Enabled])
-
-    // BasicNFt ->  function tokenURI(uint256 tokenId) public view override returns (string memory) { }
-    const { runContractFunction: getTokenURI } = useWeb3Contract({
-        abi: nftAbi,
-        contractAddress: nftAddress,
-        functionName: "tokenURI",
-        params: {
-            tokenId: tokenId,
-        },
-    })
 
     const { runContractFunction: buyItem } = useWeb3Contract({
         abi: nftMarketplaceAbi,
@@ -59,6 +50,29 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
             tokenId: tokenId,
         },
     })
+
+    const { runContractFunction: getTokenURI } = useWeb3Contract({
+        abi: nftAbi,
+        contractAddress: nftAddress,
+        functionName: "tokenURI",
+        params: {
+            tokenId: tokenId,
+        },
+    })
+
+    async function updateUI() {
+        const tokenURI = await getTokenURI()
+        console.log(`The TokenURI is ${tokenURI}`)
+        if (tokenURI) {
+            const requestURL = tokenURI.replace("ipfs://", "https://ipfs.io/ipfs/")
+            const tokenURIResponse = await (await fetch(requestURL)).json()
+            const imageURI = tokenURIResponse.image
+            const imageURIURL = imageURI.replace("ipfs://", "https://ipfs.io/ipfs/")
+            setImageURI(imageURIURL)
+            setTokenName(tokenURIResponse.name)
+            setTokenDescription(tokenURIResponse.description)
+        }
+    }
 
     const handleCardClick = () => {
         isOwnedByUser
@@ -76,21 +90,6 @@ export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress,
             title: "Item Bought",
             position: "topR",
         })
-    }
-
-    async function updateUI() {
-        const tokenURI = await getTokenURI()
-        console.log(`The TokenURI is ${tokenURI}`)
-        if (tokenURI) {
-            // IPFS Gateway: A server that will return IPFS files from a "normal" URL.
-            const requestURL = tokenURI.replace("ipfs://", "https://ipfs.io/ipfs/")
-            const tokenURIResponse = await (await fetch(requestURL)).json()
-            const imageURI = tokenURIResponse.image
-            const imageURIURL = imageURI.replace("ipfs://", "https://ipfs.io/ipfs/")
-            setImageURI(imageURIURL)
-            setTokenName(tokenURIResponse.name)
-            setTokenDescription(tokenURIResponse.description)
-        }
     }
 
     return (
