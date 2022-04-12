@@ -8,7 +8,10 @@ import styles from "../styles/Home.module.css"
 export default function Home() {
     const { isWeb3Enabled, chainId } = useMoralis()
     const chainString = chainId ? parseInt(chainId).toString() : "31337"
+    console.log(chainString)
+    console.log("chainString", chainString)
     const marketplaceAddress = networkMapping[chainString].NftMarketplace[0]
+    console.log("marketplaceAddress -->>", marketplaceAddress)
     const { loading, error, data: listedNfts } = useQuery(GET_ACTIVE_ITEMS)
 
     return (
